@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int findNumLines(FILE *fp);
 
@@ -9,6 +10,8 @@ int numLines, *data;
 void merge(int arr[], int left, int mid, int right);
 void mergeSort(int arr[], int left, int right);
 int binarySearch(int n, const int S[], int x);
+void parseData(int *data, int *b1_input, int *b1_size, int *b2_input, int *b2_size);
+int writeDestFile(FILE *fp);
 
 // ========================
 
@@ -18,13 +21,6 @@ int binarySearch(int n, const int S[], int x);
 
 int main(int argc, char *argv[])
 {
-    int i;
-    char str[100];
-    int *b1_input = (int *)malloc(numLines * sizeof(int));
-    int *b2_input = (int *)malloc(numLines * sizeof(int));
-    int *b1_size = 0;
-    int *b2_size = 0;
-
     if (argc != 3)
     {
         printf("Usage: progname <input_file> <output_file>");
@@ -36,22 +32,36 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
+    char str[100];
     numLines = findNumLines(srcFP);
-    data = (int *)malloc(numLines * sizeof(int));
-
-    for (i = 0; i < numLines; i++)
+    int *b1_input = (int *)malloc(numLines * sizeof(int));
+    int *b2_input = (int *)malloc(numLines * sizeof(int));
+    int b1_size = 0;
+    int b2_size = 0;
+    // parce input string into 2 arrays
+    int is_b1 = 1;
+    while (fgets(str, 100, srcFP))
     {
-        fgets(str, 100, srcFP);
-        sscanf(str, "%lld", &(data[i]));
+        if (strstr(str, "//Part B.2") == 0)
+            is_b1 = 0;
+        if (is_b1)
+        {
+            b1_input[b1_size] = str;
+            b1_size++;
+        }
+        else
+        {
+            b2_input[b2_size] = str;
+            b2_size;
+        }
     }
 
+    // write to output
     if ((destFP = fopen(argv[2], "w")) == NULL)
     {
         perror("Error opening output file");
         exit(0);
     }
-
-    parseData(data, b1_input, b1_size, b2_input, b2_size);
 
     writeDestFile(destFP);
 
@@ -152,22 +162,39 @@ int binarySearch(int n, const int S[], int x)
     return -1;
 }
 
-void parseData(int *data, int *b1_input, int *b1_size, int *b2_input, int *b2_size)
+int b1(int *arr[], int n, int *ans_arr[])
 {
-    int i;
-    for (i = 0; i < numLines; i++)
+    // sort the list
+    // loop though each element twice to get all pairs
+    // for each pair binary search to find if theier is a number equal to the difference of the pairs
+    // put the formatted answer into ans_arr
+    // return the arr at the end of the loop
+    int ans_arr_size = 0;
+    mergeSort(arr, 0, n);
+    for (int i = 0; i < n; i++)
     {
-        if (data[i] == "//Part B.2")
+        for (int j = 0; j < n; j++)
         {
-            b1_size = i;
-            break;
+            if (i == j || (arr[i] - arr[j]) < 0)
+                continue;
+            ans_arr[ans_arr_size] = binarySearch(n, arr, arr[i] - arr[j]);
+            ans_arr_size++;
         }
-        b1_input[i] = data[i];
     }
+}
 
-    for (int j = 0; i < numLines; i++, j++)
+int b2(int *arr[], int n, int x, int *ans_arr[])
+{
+    // sort the list
+    // loop though each element
+    // for each element binary search to find the difference between that element and the given int
+    // put the formatted answer into ans_arr
+    // return the arr at the end of the loop
+    mergeSort(arr, 0, n);
+    int ans_arr_size = 0;
+    for (int i = 0; i < n; i++)
     {
-        b2_input[j] = data[i];
+        ans_arr[ans_arr_size] = binarySearch(n, arr, arr[i] - x);
+        ans_arr_size++;
     }
-
 }
