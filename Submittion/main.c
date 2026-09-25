@@ -38,6 +38,11 @@ int main(int argc, char *argv[])
     int *b2_input = (int *)malloc(numLines * sizeof(int));
     int b1_size = 0;
     int b2_size = 0;
+    int *b1_ans = (int *)malloc(numLines * sizeof(int));
+    int *b2_ans = (int *)malloc(numLines * sizeof(int));
+    int *b1_ans_size = 0;
+    int *b2_ans_size = 0;
+    int x = 0;
     // parce input string into 2 arrays
     int is_b1 = 1;
     while (fgets(str, 100, srcFP))
@@ -56,6 +61,9 @@ int main(int argc, char *argv[])
         }
     }
 
+    b1(b1_input, b1_size, b1_ans, b1_ans_size);
+    b2(b2_input, b2_size, x, b2_ans, b2_ans_size);
+
     // write to output
     if ((destFP = fopen(argv[2], "w")) == NULL)
     {
@@ -63,7 +71,13 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    writeDestFile(destFP);
+    fprintf(destFP, "// Part B.1\n");
+    for (int i = 0; i < b1_ans_size; i++)
+        fprintf(destFP, "%d\n", b1_ans[i]);
+
+        fprintf(destFP, "// Part B.2\n");
+    for (int i = 0; i < b2_ans_size; i++)
+        fprintf(destFP, "%d\n", b2_ans[i]);
 
     fclose(srcFP);
     fclose(destFP);
@@ -74,13 +88,6 @@ int main(int argc, char *argv[])
 // Utility functions
 
 // ========================
-
-int writeDestFile(FILE *fp)
-{
-    int i;
-    for (i = 0; i < numLines; i++)
-        fprintf(fp, "%d\n", data[i] * data[i]);
-}
 
 // returns file size as number of lines in the file
 int findNumLines(FILE *fp)
@@ -162,7 +169,7 @@ int binarySearch(int n, const int S[], int x)
     return -1;
 }
 
-int b1(int *arr[], int n, int *ans_arr[])
+int b1(int *arr[], int n, int *ans_arr[], int *ans_size)
 {
     // sort the list
     // loop though each element twice to get all pairs
@@ -177,13 +184,13 @@ int b1(int *arr[], int n, int *ans_arr[])
         {
             if (i == j || (arr[i] - arr[j]) < 0)
                 continue;
-            ans_arr[ans_arr_size] = binarySearch(n, arr, arr[i] - arr[j]);
-            ans_arr_size++;
+            ans_arr[*ans_size] = binarySearch(n, arr, arr[i] - arr[j]);
+            *ans_size++;
         }
     }
 }
 
-int b2(int *arr[], int n, int x, int *ans_arr[])
+int b2(int *arr[], int n, int x, int *ans_arr[], int *ans_size)
 {
     // sort the list
     // loop though each element
@@ -194,7 +201,7 @@ int b2(int *arr[], int n, int x, int *ans_arr[])
     int ans_arr_size = 0;
     for (int i = 0; i < n; i++)
     {
-        ans_arr[ans_arr_size] = binarySearch(n, arr, arr[i] - x);
-        ans_arr_size++;
+        ans_arr[*ans_size] = binarySearch(n, arr, arr[i] - x);
+        *ans_size++;
     }
 }
